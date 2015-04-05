@@ -1,62 +1,43 @@
 (function(isotopeLayoutMode, $){
+'use strict';
 
 function circularLayoutDefinition( LayoutMode ) {
 
 var CircularLayout = LayoutMode.create('circular');
 
-
-CircularLayout.prototype.density=10;
-
-CircularLayout.prototype.circleNumber=2;
-
-CircularLayout.prototype.rayValue=200;
-
-CircularLayout.prototype.angleFirst =0;
-
-CircularLayout.prototype.itemSize =100;
-
-
+CircularLayout.prototype.defaultOptions ={
+  density:10,
+  circleNumber:2,
+  rayValue:200,
+  angleFirst:0,
+  clockWise:true,
+  itemSize:100,
+  scale : function(circle){ return circle===0 ? 1.1 : Math.pow(0.9,circle);} 
+};
 
 CircularLayout.prototype._resetLayout = function() {
 
-  $.extend(this,this.isotope.options.circular);
-  this.x = 0;
- // this.y = 0;
- // this.maxY = 0;
-  // if (this.rayValue<this.itemSize*1.5)
-  // 	this.rayValue = this.itemSize*1.5; 
-  this.rayValue = Math.max(this.rayValue,this.itemSize*1.1);
+  this.CompleteOptions = $.extend({},this.defaultOptions,this.options);
+  this.CompleteOptions.rayValue = Math.max(this.CompleteOptions.rayValue,this.CompleteOptions.itemSize*1.1);
   this.elementRank=0;
-  this.elementNumber = this.getElementNumber();
+  this.elementNumber = this.isotope.items.length;
   this.relativePosition = {circle:0,relativeRank:0,relativeRankMax:0};
 
-  var maxpos = this.getCirclePosition(this.isotope.items.length-1),
-      maxlength = this.rayValue * (1 + (maxpos.circle)*2 );
+  var maxpos = this.getCirclePosition(this.elementNumber-1),
+      maxlength = this.options.rayValue * (1 + (maxpos.circle)*2 );
   
-this.x = maxlength;
-//this.y = maxlength;
- // this.elementSize=0;
-  this._getMeasurement( 'gutter', 'outerWidth' );
-};
-
-CircularLayout.prototype.getElementNumber = function(){
-	var sum =1,element=this.density;
-	for(var i=0;i<this.circleNumber;i++){
-		sum+=element;
-		element*=2;
-	}
-	return sum;
+  this.x = maxlength;
 };
 
 CircularLayout.prototype.getCirclePosition = function(rank){
 
-	if (rank===0)
+	if (rank===0){
 		return {circle:0,relativeRank:0,relativeRankMax:0};
+  }
 
-	var relative = rank-1,elementdensity=this.density;
+	var relative = rank-1,elementdensity=this.CompleteOptions.density;
 
-
-	for(var i=0;i<this.circleNumber;i++){
+	for(var i=0;i<this.CompleteOptions.circleNumber;i++){
 
 		if (relative<elementdensity){
 			return {circle:1+i,relativeRank:relative, relativeRankMax:elementdensity};
@@ -70,31 +51,30 @@ CircularLayout.prototype.getCirclePosition = function(rank){
 };
 
 
-
-
-
-
 CircularLayout.prototype.updateRelativeCirclePosition= function(relativePosition){
 
-	if (relativePosition===null)
+	if (relativePosition===null){
 		return null;
+  }
 
 	relativePosition.relativeRank+=1;
 
-	if (relativePosition.relativeRank<relativePosition.relativeRankMax)
+	if (relativePosition.relativeRank<relativePosition.relativeRankMax){
 		return relativePosition;
+  }
 
 	relativePosition.circle+=1;
-	if (relativePosition.circle>this.circleNumber)
+	if (relativePosition.circle>this.options.circleNumber){
 		return null;
+  }
 
 	relativePosition.relativeRank=0;
-	relativePosition.relativeRankMax = (relativePosition.relativeRankMax===0)? this.density : relativePosition.relativeRankMax*2;
+	relativePosition.relativeRankMax = (relativePosition.relativeRankMax===0)? this.CompleteOptions.density : relativePosition.relativeRankMax*2;
 	return relativePosition;
 };
 
 
-function applytransform($element, value){
+function applyTransform($element, value){
 	$element.css({
             '-webkit-transform': value,
             '-moz-transform': value,
@@ -108,53 +88,33 @@ function applytransform($element, value){
 CircularLayout.prototype._getItemLayoutPosition = function( item ) {
   item.getSize();
 
+ var $element = $(item.element),
+    relative = this.relativePosition;
 
-  var relative = this.relativePosition;
-  // this.getCirclePosition(this.elementRank);
-
-  if (relative==null){
-  	return;
+  if (relative===null){
+    $element.hide();
+  	return {x:0,y:0};
   }
 
-  // var itemWidth = item.size.outerWidth + this.gutter;
-  // var containerWidth = this.isotope.size.innerWidth + this.gutter;
-  // if ( this.x !== 0 && itemWidth + this.x > containerWidth ) {
-  //   this.x = 0;
-  //   this.y = this.maxY;
-  // }
+  $element.show();
 
   var xcenter = this.x / 2, 
-     // ycenter = this.y / 2,
-      xcenteritem = - this.itemSize/2,
-    //  ycenteritem = - item.size.outerHeight/2,
-      ray = relative.circle * this.rayValue,
-      angle = (relative.relativeRankMax===0)? 0 : this.angleFirst + (Math.PI * 2 * relative.relativeRank/ relative.relativeRankMax);
-
-      console.log('angle '+ angle);
-
+      xcenteritem = - this.options.itemSize/2,
+      ray = relative.circle * this.options.rayValue,
+      angle = (relative.relativeRankMax===0)? 0 : this.CompleteOptions.angleFirst + (Math.PI * 2 * relative.relativeRank/ relative.relativeRankMax);
 
   var position = {
     x: xcenter + ray * Math.cos(angle) + xcenteritem,
     y: xcenter + ray * Math.sin(angle) + xcenteritem
   };
+ 
+  $element.css({'z-index': this.elementNumber+10 -this.elementRank, height:this.CompleteOptions.itemSize, width:this.CompleteOptions.itemSize});
+  var scale =  this.CompleteOptions.scale(relative.circle);
+  applyTransform($element,'scale( '+scale +' )');
 
-
-
-  // this.maxY = Math.max( this.maxY, this.y + item.size.outerHeight );
-  // this.x += itemWidth;
-
-   // this.x = Math.max( this.x, position.x);
-   // this.y = Math.max( this.y, position.y);
 
   this.elementRank+=1;
-  console.log(relative);
-
   this.relativePosition = this.updateRelativeCirclePosition(this.relativePosition);
-
-  var $element = $(item.element);
-  $element.css({'z-index': this.elementNumber+10 -this.elementRank, height:this.itemSize, width:this.itemSize});
-
-  console.log(position);
 
   return position;
 };
@@ -164,9 +124,7 @@ CircularLayout.prototype._getContainerSize = function() {
 };
 
 return CircularLayout;
-
-
-};
+}
 
 circularLayoutDefinition(isotopeLayoutMode);
 }
