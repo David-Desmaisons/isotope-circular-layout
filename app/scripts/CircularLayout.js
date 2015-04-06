@@ -99,8 +99,8 @@ CircularLayout.prototype._getItemLayoutPosition = function( item ) {
   $element.show();
 
   var xcenter = this.x / 2, 
-      xcenteritem = - this.options.itemSize/2,
-      ray = relative.circle * this.options.rayValue,
+      xcenteritem = - this.CompleteOptions.itemSize/2,
+      ray = relative.circle * this.CompleteOptions.rayValue,
       angle = (relative.relativeRankMax===0)? 0 : this.CompleteOptions.angleFirst + (Math.PI * 2 * relative.relativeRank/ relative.relativeRankMax);
 
   var position = {
