@@ -23,8 +23,9 @@ CircularLayout.prototype._resetLayout = function() {
   this.elementNumber = this.isotope.items.length;
   this.relativePosition = {circle:0,relativeRank:0,relativeRankMax:0};
 
-  var maxpos = this.getCirclePosition(this.elementNumber-1),
-      maxlength = this.options.rayValue * (1 + (maxpos.circle)*2 );
+  var maxpos = this.getCirclePosition(this.elementNumber-1);
+      circlenumber = Math.min((maxpos.circle, this.CompleteOptions.circleNumber), 
+      maxlength = this.options.rayValue * (1 + (circlenumber)*2 );
   
   this.x = maxlength;
 };
@@ -37,7 +38,7 @@ CircularLayout.prototype.getCirclePosition = function(rank){
 
 	var relative = rank-1,elementdensity=this.CompleteOptions.density;
 
-	for(var i=0;i<this.CompleteOptions.circleNumber;i++){
+	for(var i=0;;i++){
 
 		if (relative<elementdensity){
 			return {circle:1+i,relativeRank:relative, relativeRankMax:elementdensity};
@@ -47,7 +48,7 @@ CircularLayout.prototype.getCirclePosition = function(rank){
 		elementdensity*=2;
 	}
 
-	return null;
+	//return null;
 };
 
 
