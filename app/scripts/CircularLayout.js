@@ -65,7 +65,7 @@ CircularLayout.prototype.updateRelativeCirclePosition= function(relativePosition
   }
 
 	relativePosition.circle+=1;
-	if (relativePosition.circle>=this.CompleteOptions.circleNumber){
+	if (relativePosition.circle>this.CompleteOptions.circleNumber){
 		return null;
   }
 
