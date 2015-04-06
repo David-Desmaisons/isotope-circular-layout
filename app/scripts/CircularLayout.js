@@ -23,9 +23,9 @@ CircularLayout.prototype._resetLayout = function() {
   this.elementNumber = this.isotope.items.length;
   this.relativePosition = {circle:0,relativeRank:0,relativeRankMax:0};
 
-  var maxpos = this.getCirclePosition(this.elementNumber-1);
-      circlenumber = Math.min((maxpos.circle, this.CompleteOptions.circleNumber), 
-      maxlength = this.options.rayValue * (1 + (circlenumber)*2 );
+  var maxpos = this.getCirclePosition(this.elementNumber-1),
+      circlenumber = Math.min(maxpos.circle, this.CompleteOptions.circleNumber), 
+      maxlength = this.options.rayValue * (1 + circlenumber*2 );
   
   this.x = maxlength;
 };
